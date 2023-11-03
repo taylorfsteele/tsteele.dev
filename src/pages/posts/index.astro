@@ -1,11 +1,10 @@
 ---
 import { getCollection } from 'astro:content';
 
-import Layout from '../../layouts/Layout.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
 const posts = await getCollection('posts');
 ---
 
-This is the blog index
-<Layout title="nice">
+<BaseLayout title="posts">
   {posts.map((post) => <a href={`/posts/${post.slug}`}>{post.data.title}</a>)}
-</Layout>
+</BaseLayout>

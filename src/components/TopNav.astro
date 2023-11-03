@@ -1,0 +1,13 @@
+---
+import SearchButton from "./SearchButton.astro";
+---
+
+<nav class="flex flex-col items-center justify-between py-4" transition:persist>
+  <div class="flex w-full max-w-7xl gap-4 px-8">
+    <a href="/" class="flex-grow">Home</a>
+    <a href="/posts">Posts</a>
+    <a href="/about">About</a>
+    <a href="https://github.com/taylorfsteele/tsteele.dev">Github</a>
+    <SearchButton />
+  </div>
+</nav>
