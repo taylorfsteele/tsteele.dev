@@ -1,0 +1,37 @@
+---
+import SearchButton from './SearchButton.astro';
+---
+
+<nav class="nav">
+  <div class="links">
+    <a href="/" class="logo">Home</a>
+    <a href="/posts">Posts</a>
+    <a href="/about">About</a>
+    <a href="https://github.com/taylorfsteele/tsteele.dev">Github</a>
+    <SearchButton />
+  </div>
+</nav>
+<style>
+  .nav {
+    display: flex;
+    position: relative;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 0;
+  }
+
+  .links {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    max-width: 80rem;
+    padding: 0rem 1rem;
+    gap: 1rem;
+  }
+
+  .logo {
+    flex: 1 1 auto;
+  }
+</style>
