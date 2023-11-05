@@ -2,7 +2,7 @@
 
 ---
 
-<button id="themeToggle">
+<button class="toggle">
   <svg width="30px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
     <path
       class="sun"
@@ -18,9 +18,14 @@
 </button>
 
 <style>
-  #themeToggle {
+  .toggle {
     border: 0;
     background: none;
+    cursor: pointer;
+
+    &:hover {
+      rotate: 10deg;
+    }
   }
   .sun {
     fill: black;

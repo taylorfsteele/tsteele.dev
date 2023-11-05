@@ -1,14 +1,18 @@
 ---
-import SearchButton from './SearchButton.astro';
+import ThemeIcon from './ThemeIcon.astro';
 ---
 
 <nav class="nav">
   <div class="links">
-    <a href="/" class="logo">Home</a>
-    <a href="/posts">Posts</a>
-    <a href="/about">About</a>
-    <a href="https://github.com/taylorfsteele/tsteele.dev">Github</a>
-    <SearchButton />
+    <div class="logo">
+      <a href="/">tsteele.dev</a>
+    </div>
+    <div class="controls">
+      <a href="/posts">Posts</a>
+      <a href="/about">About</a>
+      <a href="https://github.com/taylorfsteele/tsteele.dev">Github</a>
+      <ThemeIcon transition:persist />
+    </div>
   </div>
 </nav>
 <style>
@@ -18,7 +22,7 @@ import SearchButton from './SearchButton.astro';
     flex-direction: column;
     justify-content: space-between;
     align-items: center;
-    padding: 1rem 0;
+    padding: 1rem;
   }
 
   .links {
@@ -27,11 +31,31 @@ import SearchButton from './SearchButton.astro';
     align-items: center;
     width: 100%;
     max-width: 80rem;
-    padding: 0rem 1rem;
     gap: 1rem;
+    flex-direction: column;
+
+    @media screen and (min-width: 640px) {
+      flex-direction: row;
+    }
+  }
+
+  .controls {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
   }
 
   .logo {
     flex: 1 1 auto;
+  }
+
+  a {
+    color: black;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+      text-underline-offset: 6px;
+    }
   }
 </style>
