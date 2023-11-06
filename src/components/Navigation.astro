@@ -11,7 +11,7 @@ import ThemeIcon from './ThemeIcon.astro';
       <a href="/posts">Posts</a>
       <a href="/about">About</a>
       <a href="https://github.com/taylorfsteele/tsteele.dev">Github</a>
-      <ThemeIcon transition:persist />
+      <ThemeIcon />
     </div>
   </div>
 </nav>
@@ -56,6 +56,10 @@ import ThemeIcon from './ThemeIcon.astro';
     &:hover {
       text-decoration: underline;
       text-underline-offset: 6px;
+    }
+
+    .dark & {
+      color: white;
     }
   }
 </style>
