@@ -1,21 +1,22 @@
 ---
-import { ViewTransitions } from 'astro:transitions';
-import Navigation from '../components/Navigation.astro';
-import Footer from '../components/Footer.astro';
-import '@fontsource-variable/montserrat';
+import { ViewTransitions } from "astro:transitions";
+import Navigation from "../components/Navigation.astro";
+import Footer from "../components/Footer.astro";
+import "@fontsource-variable/montserrat";
 
 interface Props {
   title: string;
+  description: string;
 }
 
-const { title } = Astro.props;
+const { title, description } = Astro.props;
 ---
 
 <!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="description" content="Astro description" />
+    <meta name="description" content={description} />
     <meta name="viewport" content="width=device-width" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
@@ -23,17 +24,17 @@ const { title } = Astro.props;
 
     <ViewTransitions />
     <script is:inline>
-      const storedTheme = typeof localStorage !== 'undefined' && localStorage.getItem('theme');
-      const prefersDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      const theme = storedTheme || (prefersDarkMode ? 'dark' : 'light');
+      const storedTheme = typeof localStorage !== "undefined" && localStorage.getItem("theme");
+      const prefersDarkMode = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      const theme = storedTheme || (prefersDarkMode ? "dark" : "light");
 
-      if (theme === 'light') {
-        document.documentElement.classList.remove('dark');
+      if (theme === "light") {
+        document.documentElement.classList.remove("dark");
       } else {
-        document.documentElement.classList.add('dark');
+        document.documentElement.classList.add("dark");
       }
 
-      window.localStorage.setItem('theme', theme);
+      window.localStorage.setItem("theme", theme);
     </script>
   </head>
   <body>
@@ -44,7 +45,7 @@ const { title } = Astro.props;
       html {
         box-sizing: border-box;
         background-color: #f1f5f9;
-        font-family: 'Montserrat Variable', sans-serif;
+        font-family: "Montserrat Variable", sans-serif;
         transition: background-color 0.5s ease;
 
         color: black;
