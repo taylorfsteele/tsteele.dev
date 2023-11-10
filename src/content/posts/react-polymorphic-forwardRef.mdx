@@ -252,6 +252,8 @@ I like this pattern as well, and am a big fan of the compositional nature of it 
 I personally really like [Nashe Omirro](https://dev.to/nasheomirro)'s solution and accompanying [type package](https://www.npmjs.com/package/react-polymorphed) and casting `forwardRef` to an interface that handles polymorphism.
 I think it's pretty easy to read and would be something I would be comfortable giving to other devs on a team to compose components with.
 
+Their package isn't on TypeScript 5.0 or React 18 or higher at the time of writing, but my tests with in on those versions were fine.
+
 A nice optimization they came up with as well is to speed up `ComponentPropsWithRef` by checking all unions within `ElementType` outside of a conditional type, which sped up the type checking my a decent chunk:
 
 ```tsx
@@ -262,7 +264,6 @@ type ComponentPropsWithRef<T extends ElementType> = PropsWithRef<
 >;
 ```
 
-Their package isn't on TypeScript 5.0 or higher at the time of writing, but my tests with it were positive.
 
 Lastly, all of these solutions support passing in other components from potentially other libraries that *also* have forwarded refs in those components:
 
