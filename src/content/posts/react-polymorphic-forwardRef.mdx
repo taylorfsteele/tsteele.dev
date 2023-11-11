@@ -1,5 +1,5 @@
 ---
-title: "React Polymorphic forwardRef Types that Actually Work in 2024"
+title: "Polymorphic React Components that Actually Work in 2024"
 pubDate: 2023-11-10
 description: "Woe betide those who try to make a generic forwardRef"
 author: "Taylor Steele"
@@ -12,6 +12,7 @@ tags: ["react", "typescript", "advanced-typescript"]
 ## Full Code Examples
 
 Credit: [kriopd on GitHub](https://gist.github.com/kripod/4434e7cecfdecee160026aee49ea6ee8)
+
 ```tsx title="polymorphic-forwardRef-type-assertion.tsx"
 import {
   forwardRef,
@@ -32,26 +33,26 @@ export interface BoxOwnProps<E extends ElementType = ElementType> {
 export type BoxProps<E extends ElementType> = BoxOwnProps<E> &
   Omit<IntrinsicAttributes<E>, keyof BoxOwnProps>;
 
-export type PolymorphicComponentProps<E extends ElementType, P> = P & BoxProps<E>;
-
-export const Box = forwardRef(({ as, ...restProps }: BoxOwnProps, ref: Ref<Element>) => {
-  const Element = as || "div";
-  return <Element ref={ref} {...restProps} />;
-}) as <E extends ElementType = "div">(props: BoxProps<E>) => JSX.Element;
+export const Box = forwardRef(({ as: Element = "div", ...props }: BoxOwnProps, ref: Ref<Element>) => (
+  <Element ref={ref} {...restProps} />
+)) as <E extends ElementType = "div">(props: BoxProps<E>) => JSX.Element;
 
 // Example usage:
+
 export const App = () => (
   <>
     {/* ERROR: property 'href' does not exist on type 'IntrinsicAttributes & PolymorphicAsProp<"div"> */}
     <Box href="/">😢</Box>
-    <Box as="a" href="">😎</Box>;
+    <Box as="a" href="">
+      {" "}
+      😎
+    </Box>
   </>
 );
 ```
 
-<br />
-
 Credit: [Radix Polymorphic Utility](https://github.com/radix-ui/primitives/blob/7101e7d6efb2bff13cc6761023ab85aeec73539e/packages/react/polymorphic/src/forwardRefWithAs.ts)
+
 ```tsx title="polymorphic-forwardRef-type-overloads.tsx" collapse={1-5}
 import {
   forwardRef,
@@ -76,33 +77,34 @@ interface ForwardRefComponent<IntrinsicElementString, OwnProps = object>
   ): ReactElement | null;
 }
 
-const Primitive = forwardRef(({ as: Comp = "div", ...props }, forwardedRef) => (
-  <Comp {...props} ref={forwardedRef} />
+const Box = forwardRef(({ as: Element = "div", ...props }, forwardedRef) => (
+  <Element ref={forwardedRef} {...props} />
 )) as ForwardRefComponent<"div">;
 
 // Example usage:
 export const App = () => (
   <>
     {/* ERROR:  Property 'href' does not exist on type 'IntrinsicAttributes & object & { as?: "div"; } */}
-    <Box href="/">😢</Box>;<Box as="a" href="">
+    <Box href="/">😢</Box>
+    <Box as="a" href="">
       😎
-    </Box>;
+    </Box>
+    ;
   </>
 );
 ```
 
-<br />
-
 Credit: [Nashe Omirro](https://dev.to/nasheomirro/creating-fast-type-safe-polymorphic-components-3f6p)
+
 ```tsx title="cast-forwardRef-function.tsx"
 import {
+  forwardRef,
   type ComponentPropsWithRef,
   type ElementType,
   type ForwardRefExoticComponent,
   type ForwardRefRenderFunction,
   type ReactElement,
 } from "react";
-import { forwardRef } from "react";
 
 type DistributiveOmit<T, K extends keyof any> = T extends any ? Omit<T, K> : never;
 
@@ -119,9 +121,7 @@ export type PolymorphicWithRef<
   Default extends OnlyAs,
   Props extends object = {},
   OnlyAs extends ElementType = ElementType,
-> = <T extends OnlyAs = Default>(
-  props: AsProps<T, Props, ComponentPropsWithRef<T>>,
-) => ReactElement | null;
+> = <T extends OnlyAs = Default>(props: AsProps<T, Props, ComponentPropsWithRef<T>>) => ReactElement | null;
 
 export type PolyForwardComponent<
   Default extends OnlyAs,
@@ -140,31 +140,35 @@ export type PolyRefFunction = <
   Component: ForwardRefRenderFunction<any, Props & { as?: OnlyAs }>,
 ) => PolyForwardComponent<Default, Props, OnlyAs>;
 
-const polyRef = forwardRef as PolyRefFunction;
+const polymorphicForwardRef = forwardRef as PolyRefFunction;
 
-type BoxProps = {
+interface BoxProps {
   open?: boolean;
-};
+}
 
-const Box = polyRef<"div", BoxProps>(({ as: Element = "div", ...props }, ref) => <Element ref={ref} {...props} />);
+const Box = polymorphicForwardRef<"div", BoxProps>(({ as: Element = "div", ...props }, ref) => (
+  <Element ref={ref} {...props} />
+));
 
 const App = () => (
   <>
     {/* ERROR:  Property 'href' does not exist on type 'IntrinsicAttributes */}
     <Box href="/">😢</Box>
-    <Box as="a" href="">😎</Box>
+    <Box as="a" href="">
+      😎
+    </Box>
   </>
 );
 ```
 
-### Why Do These Work and Others Don't?
+## Why Do These Work and Others Don't?
 
 If you're trying to create a React component library in 2024 and search for "React Polymorphic forwardRef TypeScript",
 you'll get a handful of answers that unfortunately don't work with the latest types for React and the latest version of TypeScript.
-Or you'll get a bunch of polymorphic components that don't include forwardedRef.
-Forward Ref can be a wonky but nessecary API, especially for library creators who are trying to support a wide audience with their components.
+Or you'll get a bunch of polymorphic components that don't include `forwardRef`.
+Forward Ref can be a wonky but nessecary API, especially for library creators who are trying to support a wide audience with their components. If you're searching for a soltion like this, you're likely in this category.
 
-In this post, we're going to ignore non components that don't need forwardRef, setting that up is a task TypeScript is [well suited](https://www.typescriptlang.org/docs/handbook/2/generics.html#generic-constraints)
+In this post, we're going to ignore polymorphic components that don't need `forwardRef`. Setting that up is a task TypeScript is [well suited](https://www.typescriptlang.org/docs/handbook/2/generics.html#generic-constraints)
 for and there's lots of blog posts and [resources](https://react-typescript-cheatsheet.netlify.app/docs/advanced/patterns_by_usecase/#polymorphic-components-eg-with-as-props) to set that up.
 
 The problem stems from the types of `forwardRef`: It's already a generic interface that needs to accept a `ref` function or object and a `props` object:
@@ -190,9 +194,9 @@ const GenericForwardRef = forwardRef<Element extends ElementType = 'div', RefTyp
 );
 ```
 
-But we can't, that's not the interface for the function and it seems pretty tricky [to try to implement something like this](https://github.com/DefinitelyTyped/DefinitelyTyped/blob/37712a5b5c91f6f9f6f52a6e390f1f290f653a1a/types/react/index.d.ts#L822C15-L822C40).
+But we can't, that's not the interface for the function and the types already seem [complicated enough already](https://github.com/DefinitelyTyped/DefinitelyTyped/blob/37712a5b5c91f6f9f6f52a6e390f1f290f653a1a/types/react/index.d.ts#L822C15-L822C40).
 
-Stricter Type Narrowing in TypeScript 5.0 made previous solutions not work as well:
+Stricter type narrowing in TypeScript 5.0 made previous solutions not work as well. You'll see some version of this on the internet where the callback is given a generic instead of the `forwardRef` function that no longer works:
 
 ```tsx
 type RenderFunctionType = <C extends ElementType = "span">(props: ComponentProps<C>) => ReactElement | null;
@@ -212,26 +216,32 @@ const Text: RenderFunctionType = forwardRef(
 );
 ```
 
-### Need To Assert the Component or Function
+## Need To Assert the Component or Function
 
 All of these solutions cast the return value of our render function or the forwardRef function itself, which I think is a perfect use of a [type assertion](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#type-assertions):
-We, as the developers, know more about the `forwardRef` function that we're composing than TypeScript can by itself, so we're overriding it with the type information we *actually* want to use.
+We, as the developers, know more about the `forwardRef` function that we're composing than TypeScript can by itself, so we're overriding it with the type information we _actually_ want to use.
 
-### Why Is This So Hard?
+## Why Is This So Hard?
 
-One of the things that you'll end up trying as a React developer is to pass a `ref` as a prop in a function component, 
+Well it's because `forwardRef` is kind of weird. One of the things that you'll end up trying as a React developer is to pass a `ref` as a prop in a function component,
 and you'll recieve a handy runtime error that you're not allowed to do that, or you'll notice that the ref ends up as `undefined`. This was possible with class components and the `createRef` API, but not functional components. Why?
 
-So far I haven't found a satisfying answer, but I would imagine that it stems from the need for React to track which refs are referencing which DOM nodes during runtime. 
-From what I can gather, [Solid](https://www.solidjs.com/) & its compiler can track all of that at compile time, and treats [refs just like any other prop](https://www.solidjs.com/tutorial/bindings_forward_refs). 
-Or maybe it's because Solid returns native DOM elements instead of JavaScript? Unclear.
+So far I haven't found a satisfying answer, but I would imagine that it stems from the need for React to track which refs are referencing which DOM nodes during runtime.
+Since refs are `undefined` or `null` until runtime, I assume React needs a specific way to handle targeting nodes that can't be handled like other pieces of data.
+Because React props are [immutable](https://react.dev/learn/passing-props-to-a-component#how-props-change-over-time) and refs aren't really assigned until after mount, passing refs via props violates that principle and would likely cause re-render weirdness.
 
-Regardless, being able to treat refs as if they were just any other piece of data would make this significantly easier. Maybe [React Forget](https://www.youtube.com/watch?v=lGEMwh32soc) will make these types less painful.
+From what I can gather, [Solid](https://www.solidjs.com/) & its compiler can track all of that at compile time, and treats [refs just like any other prop](https://www.solidjs.com/tutorial/bindings_forward_refs).
+Or maybe it's because Solid components return native HTML elements instead of JavaScript? Unclear.
 
-### Composition and `asChild`
+It was very challenging to find information as to _why_ this pattern needs to exist outside of "compatibility between class & functionc components".
+One of the best ways to learn something is to put out wrong information on the internet and have someone correct you; please [correct me](https://github.com/taylorfsteele/tsteele.dev/issues/new) if you know the answer to this 🙂.
 
-You'll notice one of the solutions above came from a now depreciated [Radix](https://www.radix-ui.com/primitives/docs/utilities/polymorphic) package, because they're transitioned to a more compositional approach to polymorphism:
-Their `asChild` method is a clever use of how React handles Props to essentially merge the props of a parent component onto the props of a child component. The result is a method that creates a compositional approach over the configuration approach from the `as` prop method:
+Regardless, being able to treat refs as if they were just any other piece of data would make this significantly easier. Maybe [React Forget](https://www.youtube.com/watch?v=lGEMwh32soc) will make these types and usage of `forwardRef` less painful by creating refs at compile time.
+
+## Composition and `asChild`
+
+You'll notice one of the solutions above came from a now depreciated [Radix](https://www.radix-ui.com/primitives/docs/utilities/polymorphic) package, they're transitioned to a more compositional approach to polymorphism:
+Their `asChild` prop is a clever use of how React creates props to essentially merge the props of a parent component onto the props of a child component. The result is a pattern that creates a **compositional** approach over the **configurable** approach from the `as` prop method:
 
 ```tsx
 export default () => (
@@ -241,20 +251,20 @@ export default () => (
 );
 ```
 
-The nice thing about this is that it discards the need to check a potentially changing type on one element, TypeScript will just check the types on each individual component as normal. 
-And if there are conflicts between props on the parent & child, you'll usually get runtime errors for bad attributes on HTML elements, or you can create your own errors for custom components and props.
+The nice thing about this is that it discards the need to check a potentially conditional type on a single element: TypeScript will just check the types on each individual component as normal.
+If there are conflicts between props on the parent & child, you'll usually get runtime errors for bad attributes on HTML elements, or you can create your own errors for custom components and props.
 
-While you'll lose the static checks that the `as` prop provides, you're still getting a good-enough static checking experience from needing to check the individual elements. 
-I like this pattern as well, and am a big fan of the compositional nature of it as well.
+While you'll lose the static checks that the `as` prop provides, you're still getting a good-enough static checking experience from needing to check the individual elements.
+I like this pattern as well, and am a big fan of the compositional nature of it.
 
-### Bonus Bits and Conclusion
+## Bonus Bits and Conclusion
 
-I personally really like [Nashe Omirro](https://dev.to/nasheomirro)'s solution and accompanying [type package](https://www.npmjs.com/package/react-polymorphed) and casting `forwardRef` to an interface that handles polymorphism.
+I personally really like [Nashe Omirro](https://dev.to/nasheomirro)'s solution & accompanying [type package](https://www.npmjs.com/package/react-polymorphed) to assert `forwardRef` to an interface that handles polymorphism.
 I think it's pretty easy to read and would be something I would be comfortable giving to other devs on a team to compose components with.
 
 Their package isn't on TypeScript 5.0 or React 18 or higher at the time of writing, but my tests with in on those versions were fine.
 
-A nice optimization they came up with as well is to speed up `ComponentPropsWithRef` by checking all unions within `ElementType` outside of a conditional type, which sped up the type checking my a decent chunk:
+A nice optimization they came up with as well is to speed up `ComponentPropsWithRef` by checking all unions within `ElementType` outside of a conditional type, which sped up the type checking by a decent chunk:
 
 ```tsx
 type ComponentPropsWithRef<T extends ElementType> = PropsWithRef<
@@ -264,16 +274,19 @@ type ComponentPropsWithRef<T extends ElementType> = PropsWithRef<
 >;
 ```
 
-
-Lastly, all of these solutions support passing in other components from potentially other libraries that *also* have forwarded refs in those components:
+Lastly, all of these solutions support passing in other components from potentially other libraries that _also_ have forwarded refs in those components:
 
 ```tsx
-import { Link } from 'react-router-dom'
+import { Link } from "react-router-dom";
 
 const App = () => (
   <>
-    <Box as="a" href="">😎</Box>
-    <Box as={Link} to='/'>🐧</Box>
+    <Box as="a" href="">
+      😎
+    </Box>
+    <Box as={Link} to="/">
+      🐧
+    </Box>
   </>
 );
 ```
